@@ -137,9 +137,9 @@
             <div v-for="(photo, index) in socialImgList" :key="photo.id" class="photo-item">
               <div class="photo-wrapper">
                 <img :src="photo.socializingImgUrl" :alt="`用户照片${index + 1}`" class="member-photo" />
-                <div class="photo-tag" v-if="photo.imgType === '0'">封面照片</div>
+                <div class="photo-tag" v-if="photo.imgType === 0">封面照片</div>
                 <div :class="['photo-status-tag', getSocialPhotoStatusClass(photo.imgReviewStatus)]">
-                  {{ photo.imgType === '0'? '封面照片':''}} {{getSocialPhotoStatusText(photo.imgReviewStatus) }}
+                  {{ photo.imgType === 0? '封面照片':''}} {{getSocialPhotoStatusText(photo.imgReviewStatus) }}
                 </div>
               </div>
               <div class="photo-actions" v-if="photo.imgReviewStatus === 0">
@@ -175,7 +175,7 @@ interface SocialImageItem {
   id: number;
   socializingImgUrl: string;
   imgReviewStatus: number; // 0: 待审核, 1: 已通过, 2: 未通过
-  imgType: string
+  imgType: number // 0: 封面照片, 1: 普通照片
 }
 
 // 定义用户详情数据类型
@@ -253,7 +253,7 @@ const fetchUserDetail = async (userId: number) => {
           url: url,
           quality: 'normal' // 默认设置为normal，实际应该从API获取
         })) : [],
-      
+
         userMbti: userData.userMbti || '未设置',
         hometown: formatLocation(userData.province, userData.city),
         presentLocation: formatLocation(userData.presentProvince, userData.presentCity),
@@ -263,7 +263,7 @@ const fetchUserDetail = async (userId: number) => {
           } else {
         ElMessage.error(response.data?.message || '获取用户详情失败')
       }
-      
+
       // 获取社交图片列表
       await fetchSocialImgList(userId)
     } catch (error) {
@@ -425,13 +425,14 @@ const getPhotoReviewStatusText = (status: number) => {
     case 1: return '已通过';
     case 2: return '未通过';
     default: return '未知';
+
   }
 }
 
 // 获取用户照片审核状态文本
 const getSocialPhotoStatusText = (status: number) => {
   console.log(status,'zne22');
-  
+
   switch (status) {
     case 0: return '待审核';
     case 1: return '已通过';
@@ -473,7 +474,7 @@ const getSocialPhotoStatusClass = (status: number) => {
 // 获取人脸认证状态文本
 const getFaceVerificationStatusText = (status: number) => {
   console.log(status,'status');
-  
+
   switch (status) {
     case 0: return '待审核';
     case 1: return '已通过';
@@ -485,7 +486,7 @@ const getFaceVerificationStatusText = (status: number) => {
 // 获取人脸认证状态标签类型
 const getFaceVerificationStatusClass = (status: number) => {
   console.log(status, 'zone phote');
-  
+
   switch (status) {
     case 0: return 'status-pending'; // 待审核
     case 1: return 'status-approved'; // 已通过
@@ -505,11 +506,11 @@ const formatLocation = (province: string, city: string) => {
 // 格式化生日函数
 const formatBirthday = (birthday: string) => {
   if (!birthday) return '未设置';
-  
+
 
     const date = new Date(birthday);
     if (isNaN(date.getTime())) return '未设置';
-    
+
     return date.toLocaleDateString('zh-CN', {
       year: 'numeric',
       month: '2-digit',
