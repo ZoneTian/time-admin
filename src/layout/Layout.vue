@@ -1,118 +1,123 @@
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router'
-import { onMounted, onUnmounted } from 'vue'
-import { ref, watch, markRaw } from 'vue'
-import { User, Calendar, Fold, Expand, HomeFilled } from '@element-plus/icons-vue'
-import MemberListView from '../views/MemberListView.vue'
-import ActivityListView from '../views/ActivityListView.vue'
-import MemberDetailView from '../views/MemberDetailView.vue'
-import ActivityDetailView from '../views/ActivityDetailView.vue'
-import ActivityEditView from '../views/ActivityEditView.vue'
-import DashboardView from '../views/DashboardView.vue'
-import eventBus from '../eventBus'
-import type { DetailRow } from '../eventBus'
-import axios from 'axios'
-import { BASE_API_URL } from '../constants/api'
-import { ElMessage } from 'element-plus'
+import { useRoute, useRouter } from "vue-router";
+import { onMounted, onUnmounted } from "vue";
+import { ref, watch, markRaw } from "vue";
+import {
+  User,
+  Calendar,
+  Fold,
+  Expand,
+  HomeFilled,
+} from "@element-plus/icons-vue";
+import MemberListView from "../views/MemberListView.vue";
+import ActivityListView from "../views/ActivityListView.vue";
+import MemberDetailView from "../views/MemberDetailView.vue";
+import ActivityDetailView from "../views/ActivityDetailView.vue";
+import ActivityEditView from "../views/ActivityEditView.vue";
+import DashboardView from "../views/DashboardView.vue";
+import eventBus from "../eventBus";
+import type { DetailRow } from "../eventBus";
+import axios from "axios";
+import { BASE_API_URL } from "../constants/api";
+import { ElMessage } from "element-plus";
 
-const route = useRoute()
-const router = useRouter()
-const username = ref(localStorage.getItem('username') || 'admin')
-const token = ref(localStorage.getItem('token') || '')
+const route = useRoute();
+const router = useRouter();
+const username = ref(localStorage.getItem("username") || "admin");
+const token = ref(localStorage.getItem("token") || "");
 
 // 处理下拉菜单命令
 const handleCommand = async (command: string) => {
-  if (command === 'logout') {
+  if (command === "logout") {
     try {
       // 调用登出接口
       if (token.value) {
-        await axios.post(`${BASE_API_URL}/user/logout`, {}, {
-
-        }).catch(err => {
-          console.warn('登出接口调用失败，可能服务端未实现此接口', err)
-        })
+        await axios.post(`${BASE_API_URL}/user/logout`, {}, {}).catch((err) => {
+          console.warn("登出接口调用失败，可能服务端未实现此接口", err);
+        });
       }
     } catch (error) {
-      console.error('登出时发生错误:', error)
+      console.error("登出时发生错误:", error);
     } finally {
       // 无论登出接口是否成功，都清除本地登录状态
-      localStorage.removeItem('isLoggedIn')
-      localStorage.removeItem('username')
-      localStorage.removeItem('token')
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("username");
+      localStorage.removeItem("token");
       // 跳转到登录页
-      router.push('/login')
+      router.push("/login");
     }
   }
-}
+};
 
 // 设置全局请求拦截器，自动添加token到请求头
 axios.interceptors.request.use(
-  config => {
-    const token = localStorage.getItem('token')
+  (config) => {
+    const token = localStorage.getItem("token");
     if (token) {
-      config.headers['api-access-token'] = token
+      config.headers["api-access-token"] = token;
     }
-    return config
+    return config;
   },
-  error => {
-    return Promise.reject(error)
+  (error) => {
+    return Promise.reject(error);
   }
-)
+);
 
 // 设置全局响应拦截器，处理token过期等情况
 axios.interceptors.response.use(
-  response => {
+  (response) => {
     // 检查响应中是否有token过期或需要重定向的标识
-    if (response.data && (
-        response.data.code === 401 ||
+    if (
+      response.data &&
+      (response.data.code === 401 ||
         response.data.code === 302 || // 添加302重定向码
         response.data.code === 10001 || // 假设10001是token过期的错误码
-        (response.data.message && response.data.message.includes('token')) // 检查错误消息是否包含token
-      )) {
+        (response.data.message && response.data.message.includes("token"))) // 检查错误消息是否包含token
+    ) {
       // 显示提示
-      ElMessage.error(response.data.message || 'Token已过期，请重新登录')
+      ElMessage.error(response.data.message || "Token已过期，请重新登录");
 
       // 清除登录状态
-      localStorage.removeItem('isLoggedIn')
-      localStorage.removeItem('username')
-      localStorage.removeItem('token')
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("username");
+      localStorage.removeItem("token");
 
       // 跳转到登录页
-      router.push('/login')
-      return Promise.reject(new Error('需要重新登录'))
+      router.push("/login");
+      return Promise.reject(new Error("需要重新登录"));
     }
-    return response
+    return response;
   },
-  error => {
+  (error) => {
     // 处理网络错误、请求被拒绝等情况
     if (error.response) {
       // 服务器返回了错误状态码
       if (error.response.status === 401 || error.response.status === 403) {
         // token过期、无效或权限不足
-        ElMessage.error('登录已过期，请重新登录')
+        ElMessage.error("登录已过期，请重新登录");
 
         // 清除登录状态
-        localStorage.removeItem('isLoggedIn')
-        localStorage.removeItem('username')
-        localStorage.removeItem('token')
+        localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("username");
+        localStorage.removeItem("token");
 
         // 跳转到登录页
-        router.push('/login')
+        router.push("/login");
       } else if (error.response.status === 500) {
-        ElMessage.error('服务器错误，请稍后再试')
+        ElMessage.error("服务器错误，请稍后再试");
       } else {
-        ElMessage.error(`请求失败: ${error.response.status}`)
+        ElMessage.error(`请求失败: ${error.response.status}`);
       }
     } else if (error.request) {
       // 请求已发送但没有收到响应
-      ElMessage.error('服务器无响应，请检查网络连接')
+      ElMessage.error("服务器无响应，请检查网络连接");
     } else {
       // 请求配置出错
-      ElMessage.error('请求错误，请稍后再试')
+      ElMessage.error("请求错误，请稍后再试");
     }
-    return Promise.reject(error)
+    return Promise.reject(error);
   }
-)
+);
 
 interface TabItem {
   title: string;
@@ -125,248 +130,257 @@ interface TabItem {
 // tab 列表，包含固定和动态tab
 const tabs = ref<TabItem[]>([
   {
-    title: '首页',
-    name: '/dashboard',
+    title: "首页",
+    name: "/dashboard",
     component: markRaw(DashboardView),
     closable: false,
-  }
-])
-const activeTab = ref(route.path.startsWith('/member/') ? `/member/${route.params.id}` : route.path)
+  },
+]);
+const activeTab = ref(
+  route.path.startsWith("/member/") ? `/member/${route.params.id}` : route.path
+);
 
 // 获取默认激活的菜单项
 const getDefaultActive = () => {
-  if (route.path.startsWith('/member/')) {
-    return '/member'
-  } else if (route.path.startsWith('/activity/') || route.path.startsWith('/activity-edit/') || route.path.startsWith('/activity-create')) {
-    return '/activity'
+  if (route.path.startsWith("/member/")) {
+    return "/member";
+  } else if (
+    route.path.startsWith("/activity/") ||
+    route.path.startsWith("/activity-edit/") ||
+    route.path.startsWith("/activity-create")
+  ) {
+    return "/activity";
   } else {
-    return route.path
+    return route.path;
   }
-}
+};
 
 // 动态添加tab
 function addTab(tab: TabItem) {
-  if (!tabs.value.find(t => t.name === tab.name)) {
-    tab.component = markRaw(tab.component)
-    tabs.value.push(tab)
+  if (!tabs.value.find((t) => t.name === tab.name)) {
+    tab.component = markRaw(tab.component);
+    tabs.value.push(tab);
   }
-  activeTab.value = tab.name
+  activeTab.value = tab.name;
 }
 
 // 监听eventBus事件
 onMounted(() => {
   // 移除对open-member-detail的监听，因为我们已经通过组件事件处理它
   // eventBus.on('open-member-detail', handleOpenMemberDetail)
-  eventBus.on('open-activity-detail', handleOpenActivityDetail)
-  eventBus.on('open-activity-create', handleOpenActivityCreate)
-  eventBus.on('open-activity-edit', handleOpenActivityEdit)
-  eventBus.on('close-current-tab', handleCloseTab)
-})
+  eventBus.on("open-activity-detail", handleOpenActivityDetail);
+  eventBus.on("open-activity-create", handleOpenActivityCreate);
+  eventBus.on("open-activity-edit", handleOpenActivityEdit);
+  eventBus.on("close-current-tab", handleCloseTab);
+});
 onUnmounted(() => {
   // eventBus.off('open-member-detail', handleOpenMemberDetail)
-  eventBus.off('open-activity-detail', handleOpenActivityDetail)
-  eventBus.off('open-activity-create', handleOpenActivityCreate)
-  eventBus.off('open-activity-edit', handleOpenActivityEdit)
-  eventBus.off('close-current-tab', handleCloseTab)
-})
+  eventBus.off("open-activity-detail", handleOpenActivityDetail);
+  eventBus.off("open-activity-create", handleOpenActivityCreate);
+  eventBus.off("open-activity-edit", handleOpenActivityEdit);
+  eventBus.off("close-current-tab", handleCloseTab);
+});
 
 // 处理关闭标签页事件
 function handleCloseTab(tabName: string) {
-  console.log('关闭标签页:', tabName)
-  removeTab(tabName)
+  console.log("关闭标签页:", tabName);
+  removeTab(tabName);
 }
 
-
 function handleOpenMemberDetail(row: DetailRow) {
-  const tabName = `/member/${row.id}`
-  const title = `用户详情-${row.nickname || row.name || row.id}`
+  const tabName = `/member/${row.id}`;
+  const title = `用户详情-${row.nickname || row.name || row.id}`;
   addTab({
     title,
     name: tabName,
     component: markRaw(MemberDetailView),
     closable: true,
     params: { id: Number(row.id) },
-  })
-  activeTab.value = tabName
-  router.push(tabName)
+  });
+  activeTab.value = tabName;
+  router.push(tabName);
 }
 
 function handleOpenActivityDetail(row: DetailRow) {
-  const tabName = `/activity/${row.id}`
-  const title = `活动详情-${row.title || row.id}`
+  const tabName = `/activity/${row.id}`;
+  const title = `活动详情-${row.title || row.id}`;
   addTab({
     title,
     name: tabName,
     component: markRaw(ActivityDetailView),
     closable: true,
     params: { id: Number(row.id) },
-  })
-  activeTab.value = tabName
-  router.push(tabName)
+  });
+  activeTab.value = tabName;
+  router.push(tabName);
 }
 
 function handleOpenActivityCreate() {
-  const tabName = '/activity-edit'
-  const title = '创建活动'
+  const tabName = "/activity-edit";
+  const title = "创建活动";
   addTab({
     title,
     name: tabName,
     component: markRaw(ActivityEditView),
     closable: true,
-  })
-  activeTab.value = tabName
-  router.push(tabName)
+  });
+  activeTab.value = tabName;
+  router.push(tabName);
 }
 
 function handleOpenActivityEdit(row: DetailRow) {
-  const id = row.id
+  const id = row.id;
   if (!id) {
-    console.error('活动ID不能为空2')
-    return
+    console.error("活动ID不能为空2");
+    return;
   }
 
-  console.log('编辑活动:', row)
-  console.log('活动ID:', id)
+  console.log("编辑活动:", row);
+  console.log("活动ID:", id);
 
-  const tabName = `/activity-edit/${id}`
-  const title = `编辑活动-${row.activityTitle || id}`
+  const tabName = `/activity-edit/${id}`;
+  const title = `编辑活动-${row.activityTitle || id}`;
   addTab({
     title,
     name: tabName,
     component: markRaw(ActivityEditView),
     closable: true,
     params: { id: Number(id) },
-  })
-  activeTab.value = tabName
-  router.push(tabName)
+  });
+  activeTab.value = tabName;
+  router.push(tabName);
 }
 
 watch(
   () => route.fullPath,
   (val) => {
-    if (val === '/member' || val === '/activity' || val === '/dashboard') {
-      activeTab.value = val
-    } else if (val.startsWith('/member/')) {
-      const id = Number(route.params.id)
-      const title = `用户详情-${id}`
+    if (val === "/member" || val === "/activity" || val === "/dashboard") {
+      activeTab.value = val;
+    } else if (val.startsWith("/member/")) {
+      const id = Number(route.params.id);
+      const name = route.params.name;
+      const title = `用户详情-${name || id}`;
       addTab({
         title,
         name: `/member/${id}`,
         component: markRaw(MemberDetailView),
         closable: true,
         params: { id },
-      })
-      activeTab.value = `/member/${id}`
-    } else if (val.startsWith('/activity/')) {
-      const id = Number(route.params.id)
-      const title = `活动详情-${id}`
+      });
+      activeTab.value = `/member/${id}`;
+    } else if (val.startsWith("/activity/")) {
+      const id = Number(route.params.id);
+      const title = `活动详情-${id}`;
       addTab({
         title,
         name: `/activity/${id}`,
         component: markRaw(ActivityDetailView),
         closable: true,
         params: { id },
-      })
-      activeTab.value = `/activity/${id}`
-    } else if (val === '/activity-edit') {
+      });
+      activeTab.value = `/activity/${id}`;
+    } else if (val === "/activity-edit") {
       // 处理创建活动的情况
-      const title = '创建活动'
+      const title = "创建活动";
       addTab({
         title,
-        name: '/activity-edit',
+        name: "/activity-edit",
         component: markRaw(ActivityEditView),
         closable: true,
-      })
-      activeTab.value = '/activity-edit'
-    } else if (val.startsWith('/activity-edit/')) {
+      });
+      activeTab.value = "/activity-edit";
+    } else if (val.startsWith("/activity-edit/")) {
       // 处理编辑活动的情况
-      const id = Number(route.params.id)
-      const title = `编辑活动-${id}`
+      const id = Number(route.params.id);
+      const title = `编辑活动-${id}`;
       addTab({
         title,
         name: `/activity-edit/${id}`,
         component: markRaw(ActivityEditView),
         closable: true,
         params: { id },
-      })
-      activeTab.value = `/activity-edit/${id}`
+      });
+      activeTab.value = `/activity-edit/${id}`;
     }
   },
   { immediate: true }
-)
+);
 
 // tab 切换时同步路由
 function handleTabClick(tab: any) {
   if (tab.props.name !== route.path) {
-    activeTab.value = tab.props.name
-    router.push(tab.props.name)
+    activeTab.value = tab.props.name;
+    router.push(tab.props.name);
   }
 }
 
 // 关闭tab
 function removeTab(name: string) {
-  console.log('关闭标签:', name)
-  const idx = tabs.value.findIndex(t => t.name === name)
+  console.log("关闭标签:", name);
+  const idx = tabs.value.findIndex((t) => t.name === name);
   if (idx > -1) {
     // 如果要关闭的是当前激活的标签，先切换到其他标签
     if (activeTab.value === name) {
-      const next = tabs.value[idx - 1] || tabs.value[0]
+      const next = tabs.value[idx - 1] || tabs.value[0];
       if (next) {
-        activeTab.value = next.name
-        router.push(next.name)
+        activeTab.value = next.name;
+        router.push(next.name);
       }
     }
 
     // 从数组中移除标签
-    tabs.value.splice(idx, 1)
+    tabs.value.splice(idx, 1);
 
-    console.log('关闭后的标签列表:', tabs.value.map(t => t.name))
+    console.log(
+      "关闭后的标签列表:",
+      tabs.value.map((t) => t.name)
+    );
   }
 }
 
-const collapsed = ref(false)
+const collapsed = ref(false);
 const toggleCollapse = () => {
-  collapsed.value = !collapsed.value
-}
+  collapsed.value = !collapsed.value;
+};
 
 const handleMenuSelect = (index: string) => {
   // 如果tab不存在，自动添加
-  if (!tabs.value.find(t => t.name === index)) {
-    let tab
-    if (index === '/dashboard') {
+  if (!tabs.value.find((t) => t.name === index)) {
+    let tab;
+    if (index === "/dashboard") {
       tab = {
-        title: '系统概览',
-        name: '/dashboard',
+        title: "系统概览",
+        name: "/dashboard",
         component: markRaw(DashboardView),
         closable: false,
-      }
-    } else if (index === '/member') {
+      };
+    } else if (index === "/member") {
       tab = {
-        title: '用户管理',
-        name: '/member',
+        title: "用户管理",
+        name: "/member",
         component: markRaw(MemberListView),
         closable: false,
-      }
-    } else if (index === '/activity') {
+      };
+    } else if (index === "/activity") {
       tab = {
-        title: '活动管理',
-        name: '/activity',
+        title: "活动管理",
+        name: "/activity",
         component: markRaw(ActivityListView),
         closable: false,
-      }
-    } else if (index === '/activity-edit') {
+      };
+    } else if (index === "/activity-edit") {
       tab = {
-        title: '创建活动',
-        name: '/activity-edit',
+        title: "创建活动",
+        name: "/activity-edit",
         component: markRaw(ActivityEditView),
         closable: true,
-      }
+      };
     }
-    if (tab) addTab(tab)
+    if (tab) addTab(tab);
   }
-  activeTab.value = index
-  router.push(index)
-}
+  activeTab.value = index;
+  router.push(index);
+};
 </script>
 
 <template>
@@ -375,7 +389,13 @@ const handleMenuSelect = (index: string) => {
       <div class="logo-area">
         <span v-if="!collapsed" class="logo-text">我们时刻</span>
         <span v-else class="logo-text-collapsed">我</span>
-        <el-button class="collapse-btn" @click="toggleCollapse" text circle size="small">
+        <el-button
+          class="collapse-btn"
+          @click="toggleCollapse"
+          text
+          circle
+          size="small"
+        >
           <el-icon>
             <component :is="collapsed ? Expand : Fold" />
           </el-icon>
@@ -422,7 +442,12 @@ const handleMenuSelect = (index: string) => {
           </el-dropdown>
         </div>
       </div>
-      <el-tabs v-model="activeTab" type="card" @tab-click="handleTabClick" @tab-remove="removeTab">
+      <el-tabs
+        v-model="activeTab"
+        type="card"
+        @tab-click="handleTabClick"
+        @tab-remove="removeTab"
+      >
         <el-tab-pane
           v-for="tab in tabs"
           :key="tab.name"

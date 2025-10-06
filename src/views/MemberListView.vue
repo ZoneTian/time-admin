@@ -45,18 +45,6 @@
         <el-table-column prop="customerId" label="用户ID" width="80" />
         <el-table-column prop="customerSerial" label="用户编号" width="120" />
         <el-table-column prop="nickName" label="用户昵称" width="120" />
-        <el-table-column prop="gender" label="性别" width="80">
-          <template #default="{ row }">
-            {{ getGenderText(row.gender) }}
-          </template>
-        </el-table-column>
-        <el-table-column prop="school" label="学校" width="150" />
-        <el-table-column prop="academics" label="学历/学术水平" width="120" />
-        <el-table-column prop="registrationTime" label="注册时间" width="180">
-          <template #default="{ row }">
-            {{ formatDate(row.registrationTime) }}
-          </template>
-        </el-table-column>
         <el-table-column prop="academicReviewStatus" label="学历认证状态" width="120">
           <template #default="{ row }">
             <el-tag :type="getAcademicReviewStatusType(row.academicReviewStatus)">
@@ -69,6 +57,17 @@
             <el-tag :type="getPhotoReviewStatusType(row.photoReviewStatus)">
               {{ getPhotoReviewStatusText(row.photoReviewStatus) }}
             </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="gender" label="性别" width="80">
+          <template #default="{ row }">
+            {{ getGenderText(row.gender) }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="school" label="学校" width="150" />
+        <el-table-column prop="registrationTime" label="注册时间" width="180">
+          <template #default="{ row }">
+            {{ formatDate(row.registrationTime) }}
           </template>
         </el-table-column>
         <el-table-column label="操作" width="100" fixed="right">
