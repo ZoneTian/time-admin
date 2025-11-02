@@ -245,6 +245,7 @@ const getAcademicReviewStatusType = (status: number) => {
     case 0: return 'info';    // 待审核
     case 1: return 'success'; // 已通过
     case 2: return 'danger';  // 未通过
+    case 3: return 'info'
     default: return 'info';
   }
 }
@@ -255,6 +256,7 @@ const getAcademicReviewStatusText = (status: number) => {
     case 0: return '待审核';
     case 1: return '已通过';
     case 2: return '未通过';
+    case 3: return '未审核'
     default: return '未知';
   }
 }
@@ -265,6 +267,8 @@ const getPhotoReviewStatusType = (status: number) => {
     case 0: return 'info';    // 待审核
     case 1: return 'success'; // 已通过
     case 2: return 'danger';  // 未通过
+    case 3: return 'info';  // 未审核
+
     default: return 'info';
   }
 }
@@ -275,6 +279,7 @@ const getPhotoReviewStatusText = (status: number) => {
     case 0: return '待审核';
     case 1: return '已通过';
     case 2: return '未通过';
+    case 3: return '未审核';
     default: return '未知';
   }
 }

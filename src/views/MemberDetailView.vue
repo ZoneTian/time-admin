@@ -52,7 +52,7 @@
             <el-col :span="8">
               <el-form :model="member" label-width="100px" class="info-form">
                 <el-form-item label="微信号">
-                  <el-input v-model="member.wechat" disabled />
+                  <el-input v-model="member.wechatAccount" disabled />
                 </el-form-item>
                 <el-form-item label="手机号">
                   <el-input v-model="member.telephone" disabled />
@@ -174,7 +174,7 @@ const id = Number(props.id || route.params.id)
 interface SocialImageItem {
   id: number;
   socializingImgUrl: string;
-  imgReviewStatus: number; // 0: 待审核, 1: 已通过, 2: 未通过
+  imgReviewStatus: number; // 0: 待审核, 1: 已通过, 2: 未通过 3 未审核
   imgType: number // 0: 封面照片, 1: 普通照片
 }
 
@@ -187,7 +187,7 @@ interface MemberDetail {
   userHeight: string;
   school: string;
   education: string;
-  wechat: string;
+  wechatAccount: string;
   telephone: string;
   registerTime: string;
   educationVerify: string;
@@ -199,7 +199,7 @@ interface MemberDetail {
   hometown: string; // 新增家乡字段
   presentLocation: string; // 新增现居地字段
   userSelfie: string; // 用户人脸照片
-  faceVerificationStatus: number; // 人脸认证状态：0-待审核, 1-已通过, 2-未通过
+  faceVerificationStatus: number; // 人脸认证状态：0-待审核, 1-已通过, 2-未通过 3 未审核
   photoReviewStatusText:string;
 }
 
@@ -243,7 +243,7 @@ const fetchUserDetail = async (userId: number) => {
         userHeight: userData.userHeight ? `${userData.userHeight}cm` : '未设置',
         school: userData.school || '未设置',
         education: userData.academics || '未设置',
-        wechat: userData.wechatId || '未设置',
+        wechatAccount: userData.wechatAccount || '未设置',
         telephone: userData.telephone || '未设置',
         registerTime: formatDate(userData.registrationTime),
         educationVerify: getAcademicReviewStatusText(userData.academicReviewStatus),
@@ -414,6 +414,7 @@ const getAcademicReviewStatusText = (status: number) => {
     case 0: return '待审核';
     case 1: return '已认证';
     case 2: return '认证失败';
+    case 3: return '未审核'
     default: return '未知';
   }
 }
@@ -424,6 +425,7 @@ const getPhotoReviewStatusText = (status: number) => {
     case 0: return '待审核';
     case 1: return '已通过';
     case 2: return '未通过';
+    case 3: return '未审核'
     default: return '未知';
 
   }
@@ -437,6 +439,7 @@ const getSocialPhotoStatusText = (status: number) => {
     case 0: return '待审核';
     case 1: return '已通过';
     case 2: return '未通过';
+    case 3: return '未审核'
     default: return '未知';
   }
 }
@@ -457,6 +460,7 @@ const getEducationVerifyType = (status: string) => {
     case '待审核': return 'warning';
     case '已认证': return 'success';
     case '认证失败': return 'danger';
+    case '未审核' : return 'warning'
     default: return 'info';
   }
 }
@@ -467,6 +471,7 @@ const getSocialPhotoStatusClass = (status: number) => {
     case 0: return 'status-pending'; // 待审核
     case 1: return 'status-approved'; // 已通过
     case 2: return 'status-rejected'; // 未通过
+    case 3: return 'status-pending'; // 未审核
     default: return 'status-unknown';
   }
 }
@@ -479,6 +484,7 @@ const getFaceVerificationStatusText = (status: number) => {
     case 0: return '待审核';
     case 1: return '已通过';
     case 2: return '未通过';
+    case 3: return '未审核';
     default: return '未知';
   }
 }
@@ -491,6 +497,7 @@ const getFaceVerificationStatusClass = (status: number) => {
     case 0: return 'status-pending'; // 待审核
     case 1: return 'status-approved'; // 已通过
     case 2: return 'status-rejected'; // 未通过
+    case 3: return 'status-pending'; // 未审核
     default: return 'status-unknown';
   }
 }
