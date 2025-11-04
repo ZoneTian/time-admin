@@ -121,7 +121,7 @@
                   {{ getFaceVerificationStatusText(member.photoReviewStatus) }}
                 </div>
               </div>
-              <div class="photo-actions" v-if="member.photoReviewStatus === 0">
+              <div class="photo-actions" v-if="member.photoReviewStatus !== 1">
                 <el-button type="success" size="small" @click="auditFaceVerification(1)">人脸认证通过</el-button>
                 <el-button type="danger" size="small" @click="auditFaceVerification(2)">人脸认证驳回</el-button>
               </div>
@@ -142,7 +142,7 @@
                   {{ photo.imgType === 0? '封面照片':''}} {{getSocialPhotoStatusText(photo.imgReviewStatus) }}
                 </div>
               </div>
-              <div class="photo-actions" v-if="photo.imgReviewStatus === 0">
+              <div class="photo-actions" v-if="photo.imgReviewStatus !== 1">
                 <el-button type="success" size="small" @click="auditSingleImage(photo.id, 1)">审核通过</el-button>
                 <el-button type="danger" size="small" @click="auditSingleImage(photo.id, 2)">审核不通过</el-button>
               </div>
