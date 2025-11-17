@@ -242,7 +242,7 @@ const formatDate = (dateString: string) => {
 // 获取学历认证状态标签类型
 const getAcademicReviewStatusType = (status: number) => {
   switch (status) {
-    case 0: return 'info';    // 待审核
+    case 0: return 'warning';    // 待审核
     case 1: return 'success'; // 已通过
     case 2: return 'danger';  // 未通过
     case 3: return 'info'
@@ -264,7 +264,7 @@ const getAcademicReviewStatusText = (status: number) => {
 // 获取照片审核状态标签类型
 const getPhotoReviewStatusType = (status: number) => {
   switch (status) {
-    case 0: return 'info';    // 待审核
+    case 0: return 'warning';    // 待审核
     case 1: return 'success'; // 已通过
     case 2: return 'danger';  // 未通过
     case 3: return 'info';  // 未审核

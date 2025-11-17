@@ -428,7 +428,7 @@ const getPhotoReviewStatusText = (status: number) => {
     case 3: return '未审核'
     default: return '未知';
 
-  }
+  }  
 }
 
 // 获取用户照片审核状态文本
@@ -460,7 +460,7 @@ const getEducationVerifyType = (status: string) => {
     case '待审核': return 'warning';
     case '已认证': return 'success';
     case '认证失败': return 'danger';
-    case '未审核' : return 'warning'
+    case '未审核' : return 'info'
     default: return 'info';
   }
 }
@@ -471,7 +471,7 @@ const getSocialPhotoStatusClass = (status: number) => {
     case 0: return 'status-pending'; // 待审核
     case 1: return 'status-approved'; // 已通过
     case 2: return 'status-rejected'; // 未通过
-    case 3: return 'status-pending'; // 未审核
+    case 3: return 'status-unknown'; // 未审核
     default: return 'status-unknown';
   }
 }
@@ -497,7 +497,7 @@ const getFaceVerificationStatusClass = (status: number) => {
     case 0: return 'status-pending'; // 待审核
     case 1: return 'status-approved'; // 已通过
     case 2: return 'status-rejected'; // 未通过
-    case 3: return 'status-pending'; // 未审核
+    case 3: return 'status-unknown'; // 未审核
     default: return 'status-unknown';
   }
 }
